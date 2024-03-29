@@ -1,0 +1,130 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
+
+
+public class Ferry {
+    public static void main(String[] args) {
+        int inputLength;
+        int[] cars;
+        int flen;
+        try {
+            String filename = args[0];
+            Scanner read = new Scanner(new File(filename));
+            inputLength = Integer.parseInt(read.next());
+            cars=new int[inputLength+1];
+            flen=Integer.parseInt(read.next());
+            cars[0]=0;
+            int i=1;
+            while (read.hasNextLine()&& i<= cars.length){
+                cars[i]=Integer.parseInt(read.next());
+                i++;
+            }
+            read.close();
+
+        }
+        catch (ArrayIndexOutOfBoundsException e){
+            System.out.println("Please enter a file to process on");
+            e.printStackTrace();
+            return;
+        }catch(FileNotFoundException e){
+            System.out.println("PLease give the correct input file ");
+            return;
+        }catch (NoSuchElementException e){
+            System.out.println("Input File is Empty");
+            return;
+        }
+        int[][][] dp=new int[cars.length][flen+1][2];
+        int leftcount=0;
+        int rightcount=0;
+        boolean flag=true;
+        boolean flagleft=true;
+        boolean flagright=true;
+
+            for(int j=0;j<flen+1;j++){
+                dp[0][j]=new int[]{0,0};
+            }
+
+        for(int i=1;i<cars.length;i++){
+
+            for(int j=0;j<flen+1;j++){
+
+                if(cars[i]+dp[i-1][j][0]<=j){
+                    dp[i][j]=new int[]{cars[i]+dp[i-1][j][0],dp[i-1][j][1]};
+                    if(dp[i][j][0]==dp[i][j-1][0] && dp[i][j][1]==dp[i][j-1][1] && j>=1){
+                        dp[i][j]=new int[]{0,0};
+                    }
+                    if(flagleft){
+                        leftcount++;
+                        flagleft=false;
+                    }
+
+                }else{
+                    if(cars[i]+dp[i-1][j][1]<=flen){
+                        dp[i][j]=new int[]{dp[i-1][j][0],cars[i]+dp[i-1][j][1]};
+                        flag=false;
+                        if(flagright){
+                            rightcount++;
+                            flagright=false;
+                        }
+
+
+                    }
+//                    if(dp[i][j][0]==0 && dp[i][j][1]==0){
+//                        dp[i][j]=new int[]{dp[i-1][j][0],dp[i-1][j][1]};
+//                    }
+//
+                }
+            }
+            if(flag)break;
+            flagleft=true;
+            flagright=true;
+            flag=true;
+        }
+
+        System.out.println("Number of Cars that we can add is "+Math.max(leftcount,rightcount));
+        int j=flen;
+        int i=cars.length-1;
+        System.out.println();
+        System.out.print("Cars in the left Ferry");
+        int count=0;
+        while(i>0 && j>0){
+            if(dp[i][j][0]==0){
+                i--;
+                continue;
+            }
+            if(dp[i][j][0]==dp[i-1][j][0]){
+                //System.out.println(cars[i]);
+                i--;
+            }else{
+                System.out.print("\t"+cars[i]);
+                count++;
+                j=j-cars[i];
+                i--;
+            }
+        }
+        j=flen;
+        i=cars.length-1;
+        System.out.println();
+        System.out.print("Cars in the Right Ferry");
+        while(i>0 && j>0){
+            if(dp[i][j][0]==0){
+                i--;
+                continue;
+            }
+            if(dp[i][j][1]==dp[i-1][j][1]){
+                //System.out.println(cars[i]);
+                i--;
+            }else{
+                System.out.print("\t"+cars[i]);
+                j=j-cars[i];
+                count++;
+                i--;
+            }
+        }
+
+
+
+    }
+}
